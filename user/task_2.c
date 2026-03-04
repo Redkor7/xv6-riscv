@@ -2,6 +2,8 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
+#define BUF_SZ 256 
+
 int main(int argc, char *argv[]) {
     int pid;
     
@@ -51,23 +53,54 @@ int main(int argc, char *argv[]) {
                 exit(1);
             }
 
-            for(int i = 0; i < argc; i++) {
+            char buf[BUF_SZ];
+            int buf_pos = 0;
+
+            for (int i = 1; i < argc; i++) {
                 char *arg = argv[i];
                 int len = strlen(arg);
-                int has_written = 0;
+                
+                for (int j = 0; j < len; j++) {
+                    buf[buf_pos++] = arg[j];
 
-                while (has_written < len) {
-                    int n = write(pipefd[1], arg + has_written, len - has_written);
-                    if (n < 0) {
+                    if (buf_pos == BUF_SZ) {
+                        int has_written = 0;
+                        while (has_written < BUF_SZ) {
+                            int a = write(pipefd[1], buf + has_written, BUF_SZ - has_written);
+                            if (a < 0) {
+                                fprintf(2, "Error write failure\n");
+                                exit(1);
+                            }
+                            has_written += a;
+                        }
+                        buf_pos = 0;
+                    }
+                }
+                
+                buf[buf_pos++] = '\n';
+                if (buf_pos == BUF_SZ) {
+                    int has_written = 0;
+                    while (has_written < BUF_SZ) {
+                        int a = write(pipefd[1], buf + has_written, BUF_SZ - has_written);
+                        if (a < 0) {
+                            fprintf(2, "Error write failure\n");
+                            exit(1);
+                        }
+                        has_written += a;
+                    }
+                    buf_pos = 0;
+                }
+            }
+            
+            if (buf_pos > 0) {
+                int has_written = 0;
+                while (has_written < buf_pos) {
+                    int a = write(pipefd[1], buf + has_written, buf_pos - has_written);
+                    if (a < 0) {
                         fprintf(2, "Error write failure\n");
                         exit(1);
                     }
-                    has_written += n;
-                }
-
-                if (write(pipefd[1], "\n", 1) < 0) {
-                    fprintf(2, "Error write newline failure\n");
-                    exit(1);
+                    has_written += a;
                 }
             }
 
