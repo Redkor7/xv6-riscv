@@ -4,6 +4,18 @@
 
 #define BUF_SZ 256 
 
+int clean_buffer(int fd, char *buf, int size) {
+    int has_wr = 0;
+    while (has_wr < size) {
+        int a = write(fd, buf + has_wr, size - has_wr);
+        if (a < 0) {
+            return -1;
+        }
+        has_wr += a;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     int pid;
     
@@ -64,14 +76,9 @@ int main(int argc, char *argv[]) {
                     buf[buf_pos++] = arg[j];
 
                     if (buf_pos == BUF_SZ) {
-                        int has_written = 0;
-                        while (has_written < BUF_SZ) {
-                            int a = write(pipefd[1], buf + has_written, BUF_SZ - has_written);
-                            if (a < 0) {
-                                fprintf(2, "Error write failure\n");
-                                exit(1);
-                            }
-                            has_written += a;
+                        if (clean_buffer(pipefd[1], buf, BUF_SZ) < 0) {
+                            fprintf(2, "Error write failure\n");
+                            exit(1);
                         }
                         buf_pos = 0;
                     }
@@ -79,28 +86,18 @@ int main(int argc, char *argv[]) {
                 
                 buf[buf_pos++] = '\n';
                 if (buf_pos == BUF_SZ) {
-                    int has_written = 0;
-                    while (has_written < BUF_SZ) {
-                        int a = write(pipefd[1], buf + has_written, BUF_SZ - has_written);
-                        if (a < 0) {
-                            fprintf(2, "Error write failure\n");
-                            exit(1);
-                        }
-                        has_written += a;
+                    if (clean_buffer(pipefd[1], buf, BUF_SZ) < 0) {
+                        fprintf(2, "Error write failure\n");
+                        exit(1);
                     }
                     buf_pos = 0;
                 }
             }
             
             if (buf_pos > 0) {
-                int has_written = 0;
-                while (has_written < buf_pos) {
-                    int a = write(pipefd[1], buf + has_written, buf_pos - has_written);
-                    if (a < 0) {
-                        fprintf(2, "Error write failure\n");
-                        exit(1);
-                    }
-                    has_written += a;
+                if (clean_buffer(pipefd[1], buf, buf_pos) < 0) {
+                    fprintf(2, "Error write failure\n");
+                    exit(1);
                 }
             }
 
