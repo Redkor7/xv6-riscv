@@ -107,3 +107,15 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_ps_listinfo(void)
+{
+  int lim;
+  uint64 adr;
+  
+  argaddr(0, &adr);
+  argint(1, &lim);
+
+  return ps_listinfo(adr, lim);
+}
