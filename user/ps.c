@@ -19,18 +19,30 @@ int main(void)
     exit(1);
   }
 
-  struct procinfo *table = malloc(lim * sizeof(struct procinfo));
-  if (!table) {
-    fprintf(2, "Error: malloc failed\n");
-    exit(1);
-  }
+  struct procinfo *table = 0;
+  int count = 0;
 
-  int count = ps_listinfo(table, lim);
+  for (;;) {
+    table = malloc(lim * sizeof(struct procinfo));
+    if (table == 0) {
+      fprintf(2, "Error: memory allocation failed\n");
+      exit(1);
+    }
 
-  if (count < 0) {
-    fprintf(2, "Error: syscall error\n");
-    free(table);
-    exit(1);
+    count = ps_listinfo(table, lim);
+    
+    if (count < 0) {
+      fprintf(2, "Error: kernel error\n");
+      free(table);
+      exit(1);
+    }
+
+    if (count > lim) {
+      free(table);
+      lim = lim * 2; 
+      continue; 
+    }
+    break;
   }
 
   printf("PID\tNAME\t\tSTATE\t\tPPID\tPNAME\n");
