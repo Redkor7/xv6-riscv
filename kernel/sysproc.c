@@ -107,3 +107,29 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_dmesg(void)
+{
+  int max_len;
+  uint64 user_addr;
+
+  argaddr(0, &user_addr);
+  argint(1, &max_len);
+
+  return dmesg_r(user_addr, max_len);
+}
+
+uint64
+sys_logctrl(void)
+{
+  int target_mask;
+  int tick_limit;
+
+  argint(0, &target_mask);
+  argint(1, &tick_limit);
+
+  dmesg_set((uint)target_mask, tick_limit);
+  
+  return 0;
+}

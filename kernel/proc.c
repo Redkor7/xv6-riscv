@@ -125,6 +125,9 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+  if(should_log(LOG_PROC)) {
+    pr_msg("PROC: created pid %d (parent pid %d)", p->pid, myproc() ? myproc()->pid : 0);
+  }
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -327,6 +330,10 @@ void
 kexit(int status)
 {
   struct proc *p = myproc();
+
+  if(should_log(LOG_PROC)) {
+    pr_msg("PROC: exited pid %d", p->pid);
+  }
 
   if(p == initproc)
     panic("init exiting");
