@@ -183,3 +183,15 @@ void            virtio_disk_intr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+void            dmesginit(void);
+void            dmesg_putc(char c);
+void            pr_msg(const char*, ...);
+int             should_log(uint);
+int             dmesg_r(uint64, int);
+void            dmesg_set(uint, int);
+
+#define LOG_SYSCALL (1<<0)
+#define LOG_INTR    (1<<1)
+#define LOG_PROC    (1<<2)
+#define LOG_EXEC    (1<<3)

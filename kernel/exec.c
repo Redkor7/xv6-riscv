@@ -35,6 +35,10 @@ kexec(char *path, char **argv)
   pagetable_t pagetable = 0, oldpagetable;
   struct proc *p = myproc();
 
+  if(should_log(LOG_EXEC)) {
+    pr_msg("EXEC: proc %d running %s", myproc()->pid, path);
+  }
+
   begin_op();
 
   // Open the executable file.
