@@ -57,3 +57,7 @@
 //   TRAPFRAME (p->trapframe, used by the trampoline)
 //   TRAMPOLINE (the same page as in the kernel)
 #define TRAPFRAME (TRAMPOLINE - PGSIZE)
+
+#define RTC_BASE      0x101000L
+#define RTC_TIME_LOW  RTC_BASE
+#define RTC_TIME_HIGH (RTC_BASE + 0x04)
