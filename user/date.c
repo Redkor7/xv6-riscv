@@ -7,17 +7,36 @@ int is_leap(int year) {
 
 int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-void print_date(uint64 nsec) {
-    uint64 sec = nsec / 1000000000;
+void print_date(uint64 unsec) {
+    long nsec = (long)unsec; 
+    
+    long sec = nsec / 1000000000;
     int frac = nsec % 1000000000;
 
-    int year = 1970;
-    int days = sec / (24 * 3600);
-    int rem_sec = sec % (24 * 3600);
+    if (frac < 0) {
+        frac += 1000000000;
+        sec -= 1;
+    }
 
-    while (days >= (is_leap(year) ? 366 : 365)) {
-        days -= is_leap(year) ? 366 : 365;
-        year++;
+    int year = 1970;
+    long days = sec / 86400;
+    int rem_sec = sec % 86400;
+
+    if (rem_sec < 0) {
+        rem_sec += 86400;
+        days -= 1;
+    }
+
+    if (days >= 0) {
+        while (days >= (is_leap(year) ? 366 : 365)) {
+            days -= is_leap(year) ? 366 : 365;
+            year++;
+        }
+    } else {
+        while (days < 0) {
+            year--;
+            days += is_leap(year) ? 366 : 365; 
+        }
     }
 
     int month = 0;
